@@ -68,9 +68,9 @@ export default function Home() {
             </div>
           );
         })}
-      <div className="flex items-center justify-center disabled:text-slate-50">
+      <div className="flex items-center justify-center">
         <button
-          className="btn"
+          className="btn focus:text-slate-50 active:focus:text-slate-50"
           onClick={() => {
             fetchNextPage();
           }}
