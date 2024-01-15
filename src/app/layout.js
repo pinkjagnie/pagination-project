@@ -6,6 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 import QueryProvider from "./QueryProvider";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 export const metadata = {
   title: "Create Next App",
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
         <body className={inter.className}>
           <Navbar />
           {children}
+          <ScrollToTop />
           <Footer />
         </body>
       </QueryProvider>
