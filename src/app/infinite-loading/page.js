@@ -79,8 +79,11 @@ export default function Home() {
               body={post.body}
             />
           );
+        } else {
+          return (
+            <SinglePost key={post.id} title={post.title} body={post.body} />
+          );
         }
-        return <SinglePost key={post.id} title={post.title} body={post.body} />;
       })}
       <div className="flex items-center justify-center">
         <button
