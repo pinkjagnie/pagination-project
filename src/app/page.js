@@ -6,7 +6,6 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import ListOfPosts from "./components/ListOfPosts";
 import SinglePost from "./components/SinglePost";
-import { list } from "postcss";
 
 // const getPosts = async (page) => {
 //   const response = await fetch("/api/posts", {
@@ -70,11 +69,21 @@ export default function Home() {
       const res = await response.json();
       const slicedPosts = res.slice((page - 1) * 4, page * 4);
 
-      if (listPosts.length === 0) {
-        setListPosts(slicedPosts);
-      } else {
-        setListPosts((prevListPosts) => [...prevListPosts, ...slicedPosts]);
-      }
+      setListPosts((prevListPosts) => {
+        if (page === 1) {
+          // Jeśli to pierwsza strona, zastąp poprzednią listę nową listą
+          return slicedPosts;
+        } else {
+          // Jeśli to kolejna strona, dołącz nowe posty do poprzedniej listy
+          return [...prevListPosts, ...slicedPosts];
+        }
+      });
+
+      // if (listPosts.length === 0) {
+      //   setListPosts(slicedPosts);
+      // } else {
+      //   setListPosts((prevListPosts) => [...prevListPosts, ...slicedPosts]);
+      // }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
