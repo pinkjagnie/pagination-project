@@ -1,10 +1,29 @@
 "use client";
 
-// import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import SinglePost from "./SinglePost";
 
 const ListOfPosts = () => {
+  const [posts, setPosts] = useState();
+
+  const getPosts = async () => {
+    const response = await fetch("/api/posts", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    setPosts(data);
+    console.log(data);
+  };
+
+  useEffect(() => {
+    getPosts();
+  }, []);
+
   return (
     <section className="min-h-screen pt-32 pb-10">
       <div className="w-[90%] mx-auto text-center ">
@@ -13,13 +32,13 @@ const ListOfPosts = () => {
           Here you will find the latest news from around the world
         </h2>
       </div>
-      <div className="lg:grid lg:grid-cols-3 lg:gap-2 lg:w-[90%] lg:mx-auto xl:w-[85%]">
-        <SinglePost />
-        <SinglePost />
-        <SinglePost />
-        <SinglePost />
-        <SinglePost />
-        <SinglePost />
+      <div className="lg:grid lg:grid-cols-2 lg:gap-2 lg:w-[90%] lg:mx-auto xl:w-[85%]">
+        {posts &&
+          posts.map((post) => {
+            return (
+              <SinglePost key={post.id} title={post.title} body={post.body} />
+            );
+          })}
       </div>
     </section>
   );

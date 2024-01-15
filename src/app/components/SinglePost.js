@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const SinglePost = () => {
+const SinglePost = ({ title, body }) => {
   return (
     <div className="w-[90%] mx-auto card lg:card-side bg-base-100 shadow-xl pt-4 my-10 lg:my-4">
       <figure>
@@ -10,8 +10,8 @@ const SinglePost = () => {
         />
       </figure>
       <div className="card-body">
-        <h2 className="card-title">New album is released!</h2>
-        <p>Click the button to listen on Spotiwhy app.</p>
+        <h2 className="card-title">{title}</h2>
+        <p>{body}</p>
       </div>
     </div>
   );
