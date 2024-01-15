@@ -29,7 +29,7 @@ const ListOfPosts = () => {
   // }, []);
 
   return (
-    <section className="min-h-screen pt-32 pb-4">
+    <section className="pt-32 pb-4">
       <div className="w-[90%] mx-auto text-center ">
         <h1 className="font-bold text-3xl">Welcome to the World News!</h1>
         <h2 className="font-medium text-2xl py-6">
