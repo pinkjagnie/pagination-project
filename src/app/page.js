@@ -29,10 +29,16 @@ import SinglePost from "./components/SinglePost";
 
 export default function Home() {
   const [listPosts, setListPosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
   // const [initVal, setInitVal] = useState([]);
 
-  const getPosts = async (page) => {
+  const getPosts = async (page = 1) => {
+    console.log(page);
+    console.log(
+      "--------------------------------------------------------------------",
+      currentPage
+    );
     // const response = await fetch("/api/posts", {
     //   headers: {
     //     "Content-Type": "application/json",
@@ -56,7 +62,7 @@ export default function Home() {
     // setListPosts(res.slice((page - 1) * 4, page * 4));
 
     try {
-      const response = await fetch("/api/posts", {
+      const response = await fetch("/api/posts?page=" + page, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -67,21 +73,25 @@ export default function Home() {
       }
 
       const res = await response.json();
-      const slicedPosts = res.slice((page - 1) * 4, page * 4);
+      console.log(res[3].id);
+      return res;
 
-      setListPosts((prevListPosts) => {
-        if (page === 1) {
-          // Jeśli to pierwsza strona, zastąp poprzednią listę nową listą
-          return slicedPosts;
-        } else {
-          // Jeśli to kolejna strona, dołącz nowe posty do poprzedniej listy
-          return [...prevListPosts, ...slicedPosts];
-        }
-      });
+      // const slicedPosts = res.slice((page - 1) * 4, page * 4);
+
+      //   setListPosts((prevListPosts) => {
+      //   if (page === 1) {
+      //     // Jeśli to pierwsza strona, zastąp poprzednią listę nową listą
+      //     return slicedPosts;
+      //   } else {
+      //     // Jeśli to kolejna strona, dołącz nowe posty do poprzedniej listy
+      //     return [...prevListPosts, ...slicedPosts];
+      //   }
+      // });
 
       // if (listPosts.length === 0) {
       //   setListPosts(slicedPosts);
-      // } else {
+      // } else if (listPosts.length > 0) {
+      //   console.log(data);
       //   setListPosts((prevListPosts) => [...prevListPosts, ...slicedPosts]);
       // }
     } catch (error) {
@@ -102,9 +112,12 @@ export default function Home() {
   const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery(
     {
       queryKey: ["query"],
-      queryFn: ({ pageParam = 1 }) => getPosts(pageParam),
+      queryFn: ({ pageParam }) => getPosts(pageParam),
 
-      getNextPageParam: (_, pages) => pages.length + 1,
+      getNextPageParam: (lastPage, pages) => {
+        return pages.length + 1;
+        // return lastPage.length > 0 ? pages.length + 1 : undefined;
+      },
       initialData: { pages: [], pageParams: [1] },
     }
     //   {
@@ -151,15 +164,41 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    // Update data in query client
-    queryClient.setQueryData(["query"], {
-      pages: [listPosts],
-      pageParams: [1],
-    });
+  // useEffect(() => {
+  //   // Update data in query client
+  //   // queryClient.setQueryData(["query"], {
+  //   //   pages: [listPosts],
+  //   //   pageParams: [{ page: currentPage }],
+  //   // });
 
-    console.log(listPosts);
-  }, [listPosts, queryClient]);
+  //   // console.log(listPosts);
+
+  //   if (data.pages.length === 1) {
+  //     queryClient.setQueryData(["query"], {
+  //       pages: [listPosts],
+  //       pageParams: [{ page: 1 }],
+  //     });
+
+  //     console.log(listPosts);
+  //   } else if (data.pages.length > 1) {
+  //     // queryClient.setQueryData(["query"], {
+  //     //   pages: [listPosts],
+  //     //   pageParams: [{ page: currentPage }],
+  //     // });
+
+  //     const currentPageData = data.pages[data.pages.length - 2];
+  //     queryClient.setQueryData(["query"], {
+  //       pages: [currentPageData],
+  //       pageParams: [{ page: currentPageData.page }],
+  //     });
+
+  //     console.log(listPosts);
+  //   }
+  // }, [listPosts, currentPage, data.pages.length, queryClient]);
+  // //   queryClient.setPages((pages) => {
+  // //     return [...pages, listPosts];
+  // //   });
+  // // }, [listPosts, queryClient]);
 
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
@@ -184,7 +223,10 @@ export default function Home() {
       <div className="flex items-center justify-center disabled:text-slate-50">
         <button
           className="btn"
-          onClick={() => fetchNextPage()}
+          onClick={() => {
+            fetchNextPage();
+            setCurrentPage((prev) => prev + 1);
+          }}
           disabled={isFetchingNextPage}
         >
           {isFetchingNextPage
