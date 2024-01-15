@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRef } from "react";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+
+import { useIntersection } from "@mantine/hooks";
 
 import ListOfPosts from "../components/ListOfPosts";
 import SinglePost from "../components/SinglePost";
@@ -12,7 +15,7 @@ export default function Home() {
 
   const getPosts = async (page = 1) => {
     try {
-      const response = await fetch("/api/posts?page=" + page, {
+      const response = await fetch("/api/get-infinite", {
         headers: {
           "Content-Type": "application/json",
         },
@@ -48,39 +51,43 @@ export default function Home() {
     }
   }, []);
 
+  // stuff to infinite loading
+  const lastPostRef = useRef(null);
+  const { ref, entry } = useIntersection({
+    root: lastPostRef.current,
+    threshold: 1,
+  });
+
+  useEffect(() => {
+    if (entry && entry.isIntersecting) {
+      fetchNextPage();
+    }
+  }, [entry]);
+
+  const _posts = data?.pages.flatMap((page) => page);
+
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
       <ListOfPosts />
-      {data.pages &&
-        data.pages.map((page, i) => {
+      {_posts.map((post, i) => {
+        if (i === _posts.length) {
           return (
-            <div key={i}>
-              {page &&
-                page.map((post) => {
-                  return (
-                    <SinglePost
-                      key={post.id}
-                      title={post.title}
-                      body={post.body}
-                    />
-                  );
-                })}
-            </div>
+            <SinglePost
+              ref={ref}
+              key={post.id}
+              title={post.title}
+              body={post.body}
+            />
           );
-        })}
+        }
+        return <SinglePost key={post.id} title={post.title} body={post.body} />;
+      })}
       <div className="flex items-center justify-center">
         <button
           className="btn focus:text-slate-50 active:focus:text-slate-50"
-          onClick={() => {
-            fetchNextPage();
-          }}
           disabled={isFetchingNextPage}
         >
-          {isFetchingNextPage
-            ? "Loading more..."
-            : (data.pages.length ?? 0) < 25
-            ? "Load more"
-            : "Nothing more to load"}
+          {_posts.length === 100 ? "Nothing more to load" : "Loading..."}
         </button>
       </div>
     </main>
