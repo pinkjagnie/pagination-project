@@ -6,6 +6,7 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import ListOfPosts from "./components/ListOfPosts";
 import SinglePost from "./components/SinglePost";
+import { list } from "postcss";
 
 // const getPosts = async (page) => {
 //   const response = await fetch("/api/posts", {
@@ -68,7 +69,12 @@ export default function Home() {
 
       const res = await response.json();
       const slicedPosts = res.slice((page - 1) * 4, page * 4);
-      setListPosts((prevListPosts) => [...prevListPosts, ...slicedPosts]);
+
+      if (listPosts.length === 0) {
+        setListPosts(slicedPosts);
+      } else {
+        setListPosts((prevListPosts) => [...prevListPosts, ...slicedPosts]);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -109,10 +115,31 @@ export default function Home() {
     // }
   );
 
+  // useEffect(() => {
+  //   // Fetch initial data
+  //   getPosts(1);
+  //   console.log(data.pages);
+  // }, []);
+
+  // useEffect(() => {
+  //   // Update data in query client
+  //   queryClient.setQueryData(["query"], {
+  //     pages: [listPosts],
+  //     pageParams: [1],
+  //   });
+  // }, [listPosts, queryClient]);
+
+  // useEffect(() => {
+  //   console.log(data.pages);
+  //   console.log(listPosts);
+  //   console.log(data);
+  // }, [data.pages]);
+
   useEffect(() => {
-    // Fetch initial data
-    getPosts(1);
-    console.log(data.pages);
+    // Fetch initial data only once
+    if (data.pages.length === 0) {
+      getPosts(1);
+    }
   }, []);
 
   useEffect(() => {
@@ -121,13 +148,9 @@ export default function Home() {
       pages: [listPosts],
       pageParams: [1],
     });
-  }, [listPosts, queryClient]);
 
-  useEffect(() => {
-    console.log(data.pages);
     console.log(listPosts);
-    console.log(data);
-  }, [data.pages]);
+  }, [listPosts, queryClient]);
 
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
