@@ -3,10 +3,10 @@ export async function GET(req, res) {
     return;
   }
 
-  console.log("======", req.query);
+  // console.log("======", req.query);
   const page = req.nextUrl.searchParams.get("page");
-  console.log(req.nextUrl.searchParams);
-  console.log(" === PAGE == ", page);
+  // console.log(req.nextUrl.searchParams);
+  // console.log(" === PAGE == ", page);
 
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
