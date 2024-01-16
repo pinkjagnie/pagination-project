@@ -31,8 +31,16 @@ export default function Home() {
 
       const res = await response.json();
       // console.log(res[3].id);
+
       setLoading(false);
       setErrorMsg("");
+
+      if (res.length === 0) {
+        console.log(res.length === 0);
+        setLoading(false);
+        setErrorMsg("There is no more posts");
+      }
+
       return res;
     } catch (error) {
       setLoading(false);
@@ -64,10 +72,6 @@ export default function Home() {
       <ListOfPosts />
       {/* LOADER */}
       {loading && <Loader />}
-      {/* ERROR */}
-      {!loading && errorMsg && (
-        <ErrorMsg errorMsg={errorMsg} getPosts={getPosts} />
-      )}
       {/* POSTS */}
       {!loading &&
         data.pages &&
@@ -103,6 +107,10 @@ export default function Home() {
               : "Nothing more to load"}
           </button>
         </div>
+      )}
+      {/* ERROR */}
+      {!loading && errorMsg && (
+        <ErrorMsg errorMsg={errorMsg} getPosts={getPosts} />
       )}
     </main>
   );
