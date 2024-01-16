@@ -35,8 +35,9 @@ export default function Home() {
       setLoading(false);
       setErrorMsg("");
 
-      if (res.length === 0) {
+      if (res.length === 0 || page === 26) {
         console.log(res.length === 0);
+        console.log(page);
         setLoading(false);
         setErrorMsg("There is no more posts");
       }
