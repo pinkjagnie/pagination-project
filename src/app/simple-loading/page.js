@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import ListOfPosts from "../components/ListOfPosts";
 import SinglePost from "../components/SinglePost";
+import Loader from "../components/Loader";
+import ErrorMsg from "../components/ErrorMsg";
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const queryClient = useQueryClient();
 
   const getPosts = async (page = 1) => {
     try {
+      setLoading(true);
+
       const response = await fetch("/api/posts?page=" + page, {
         headers: {
           "Content-Type": "application/json",
@@ -24,8 +31,12 @@ export default function Home() {
 
       const res = await response.json();
       // console.log(res[3].id);
+      setLoading(false);
+      setErrorMsg("");
       return res;
     } catch (error) {
+      setLoading(false);
+      setErrorMsg("Something went wrong");
       console.error("Error fetching data:", error);
     }
   };
@@ -51,7 +62,15 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
       <ListOfPosts />
-      {data.pages &&
+      {/* LOADER */}
+      {loading && <Loader />}
+      {/* ERROR */}
+      {!loading && errorMsg && (
+        <ErrorMsg errorMsg={errorMsg} getPosts={getPosts} />
+      )}
+      {/* POSTS */}
+      {!loading &&
+        data.pages &&
         data.pages.map((page, i) => {
           return (
             <div key={i}>
@@ -68,21 +87,23 @@ export default function Home() {
             </div>
           );
         })}
-      <div className="flex items-center justify-center">
-        <button
-          className="btn focus:text-slate-50 active:focus:text-slate-50"
-          onClick={() => {
-            fetchNextPage();
-          }}
-          disabled={isFetchingNextPage}
-        >
-          {isFetchingNextPage
-            ? "Loading more..."
-            : (data.pages.length ?? 0) < 25
-            ? "Load more"
-            : "Nothing more to load"}
-        </button>
-      </div>
+      {!loading && !errorMsg && (
+        <div className="flex items-center justify-center">
+          <button
+            className="btn focus:text-slate-50 active:focus:text-slate-50"
+            onClick={() => {
+              fetchNextPage();
+            }}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage
+              ? "Loading more..."
+              : (data.pages.length ?? 0) < 25
+              ? "Load more"
+              : "Nothing more to load"}
+          </button>
+        </div>
+      )}
     </main>
   );
 }

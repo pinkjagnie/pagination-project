@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRef } from "react";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,12 +9,19 @@ import { useIntersection } from "@mantine/hooks";
 
 import ListOfPosts from "../components/ListOfPosts";
 import SinglePost from "../components/SinglePost";
+import Loader from "../components/Loader";
+import ErrorMsg from "../components/ErrorMsg";
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const queryClient = useQueryClient();
 
   const getPosts = async (page = 1) => {
     try {
+      setLoading(true);
+
       const response = await fetch("/api/get-infinite", {
         headers: {
           "Content-Type": "application/json",
@@ -27,8 +34,12 @@ export default function Home() {
 
       const res = await response.json();
       // console.log(res[3].id);
+      setLoading(false);
+      setErrorMsg("");
       return res;
     } catch (error) {
+      setLoading(false);
+      setErrorMsg("Something went wrong");
       console.error("Error fetching data:", error);
     }
   };
@@ -69,30 +80,41 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
       <ListOfPosts />
-      {_posts.map((post, i) => {
-        if (i === _posts.length) {
-          return (
-            <SinglePost
-              ref={ref}
-              key={post.id}
-              title={post.title}
-              body={post.body}
-            />
-          );
-        } else {
-          return (
-            <SinglePost key={post.id} title={post.title} body={post.body} />
-          );
-        }
-      })}
-      <div className="flex items-center justify-center">
-        <button
-          className="btn focus:text-slate-50 active:focus:text-slate-50"
-          disabled={isFetchingNextPage}
-        >
-          {_posts.length === 100 ? "Nothing more to load" : "Loading..."}
-        </button>
-      </div>
+      {/* LOADER */}
+      {loading && <Loader />}
+      {/* ERROR */}
+      {!loading && errorMsg && (
+        <ErrorMsg errorMsg={errorMsg} getPosts={getPosts} />
+      )}
+      {/* POSTS */}
+      {!loading &&
+        !errorMsg &&
+        _posts.map((post, i) => {
+          if (i === _posts.length) {
+            return (
+              <SinglePost
+                ref={ref}
+                key={post.id}
+                title={post.title}
+                body={post.body}
+              />
+            );
+          } else {
+            return (
+              <SinglePost key={post.id} title={post.title} body={post.body} />
+            );
+          }
+        })}
+      {!loading && !errorMsg && (
+        <div className="flex items-center justify-center">
+          <button
+            className="btn focus:text-slate-50 active:focus:text-slate-50"
+            disabled={isFetchingNextPage}
+          >
+            {_posts.length === 100 ? "Nothing more to load" : "Loading..."}
+          </button>
+        </div>
+      )}
     </main>
   );
 }
